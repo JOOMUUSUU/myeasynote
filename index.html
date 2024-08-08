@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Note App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Ensure dark theme styles are defined */
+      body.dark {
+        background-color: #000000;
+        color: rgb(0, 0, 0);
+        background: rgb(12, 13, 14); /* Override the linear gradient */
+      }
+
+      /* Pink and blue theme styles */
+      body {
+        background: linear-gradient(to right, pink, rgb(144, 143, 218));
+        color: #1a202c;
+        margin: 40px; /* Added margin for the entire page */
+      }
+
+      .btn {
+        background-color: #a7c1f7;
+        color: #4251da;
+        padding: 14px 24px; /* Increased padding */
+        font-size: 1.125rem; /* Increased font size */
+      }
+
+      .btn:hover {
+        background-color: #2d3748;
+      }
+
+      .note-text {
+        color: #1a202c;
+        font-size: 1.125rem; /* Increased font size */
+      }
+
+      .note-text.done {
+        text-decoration: line-through;
+        color: gray;
+      }
+
+      .border {
+        border-color: #e53e3e;
+        padding: 14px; /* Increased padding */
+      }
+
+      .search-input {
+        background-color: #ebf8ff;
+        padding: 14px; /* Increased padding */
+      }
+
+      .note-item {
+        background-color: #ebf8ff;
+        padding: 14px; /* Increased padding */
+      }
+
+      .container {
+        max-width: 650px; /* Adjusted width */
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.5
+        ); /* Transparent white background */
+        padding: 20px; /* Add padding inside the container */
+        border-radius: 10px; /* Optional: rounded corners */
+      }
+
+      h1 {
+        font-size: 2.25rem; /* Increased font size */
+      }
+
+      footer {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 1.125rem;
+      }
+
+      footer a {
+        margin: 0 10px;
+        color: #4251da;
+      }
+
+      footer a:hover {
+        color: #2d3748;
+      }
+
+      footer img {
+        width: 20px; /* Set width to 20px */
+        height: 20px; /* Set height to 20px */
+        display: inline-block;
+      }
+
+      .calendar {
+        margin-top: 20px;
+      }
+
+      .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </head>
+  <body
+    class="text-pink-600 dark:bg-blue-900 dark:text-pink-100 center-content"
+  >
+    <div class="container mx-auto p-6">
+      <h1 class="text-4xl font-bold mb-6 text-center">Easy Note</h1>
+      <button id="theme-toggle" class="btn mb-4 rounded-xl">
+        Toggle Theme
+      </button>
+      <div class="mb-6">
+        <input
+          type="text"
+          id="note-input"
+          class="border p-4 w-full rounded-xl"
+          placeholder="Add a new note"
+        />
+        <button id="add-note" class="btn mt-4 rounded-xl">Add Note</button>
+      </div>
+      <div class="mb-6">
+        <input
+          type="text"
+          id="search-input"
+          class="search-input border p-4 w-full rounded-xl"
+          placeholder="Search notes"
+        />
+      </div>
+      <ul id="note-list" class="list-none p-0"></ul>
+      <footer>
+        <a
+          href="https://www.facebook.com"
+          target="_blank"
+          class="btn rounded-xl"
+          ><img src="image/facebook.png" alt="Facebook"
+        /></a>
+        <a href="https://www.gmail.com" class="btn rounded-xl"
+          ><img src="image/gmail.png" alt="Gmail"
+        /></a>
+        <a href="https://www.tiktok.com" target="_blank" class="btn rounded-xl"
+          ><img src="image/tik-tok.png" alt="TikTok"
+        /></a>
+      </footer>
+      <div class="calendar">
+        <div id="calendar"></div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="eventModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="eventModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p id="eventTitle"></p>
+            <p id="eventTime"></p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-danger" id="deleteEvent">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
